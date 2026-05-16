@@ -1,240 +1,128 @@
-
 body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #1a1a2e;
+  color: white;
   margin: 0;
   padding: 20px;
-  background: #1a1a2e;
-  color: #ffffff;
-  /* System font stack for zero-latency loading and clean geometric rendering */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, sans-serif;
-  text-align: center;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* Arcade/Cyberpunk text glow effect */
 h1 {
-  font-size: 2.5em;
-  font-weight: 800;
-  letter-spacing: 1px;
-  margin-bottom: 25px;
-  color: #fff;
-  /* Multi-layered shadows create the ambient neon broadcast */
-  text-shadow: 
-    0 0 4px #fff, 
-    0 0 12px #e94560, 
-    0 0 30px #e94560;
-  animation: titlePulse 3s ease-in-out infinite alternate;
+  font-size: 2em;
+  margin-bottom: 20px;
 }
-
-/* Subtle ambient breath animation for the header lights */
-@keyframes titlePulse {
-  from {
-    text-shadow: 0 0 4px #fff, 0 0 10px #e94560, 0 0 25px #e94560;
-  }
-  to {
-    text-shadow: 0 0 6px #fff, 0 0 16px #e94560, 0 0 40px #e94560, 0 0 60px #e94560;
-  }
-}
-
-/* ==========================================================================
-   CONTROL PANEL (USER INPUTS)
-   ========================================================================== */
 
 #config-panel {
+  margin: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
   flex-wrap: wrap;
-  margin: 20px auto;
-  font-weight: 600;
-  color: #cbd5e1;
 }
 
 #config-panel input {
-  width: 65px;
-  padding: 6px 8px;
-  background: #16213e;
-  color: #fff;
-  font-size: 0.95em;
-  font-weight: bold;
-  border: 1px solid #475569;
-  border-radius: 6px;
+  width: 60px;
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
   text-align: center;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-/* Active border feedback when user tweaks dimensions */
-#config-panel input:focus {
-  border-color: #e94560;
 }
 
 #config-panel button {
-  padding: 8px 24px;
+  padding: 8px 20px;
   background: #e94560;
-  color: #fff;
-  font-size: 0.95em;
-  font-weight: 700;
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  /* Snappy transform transitions for click micro-interactions */
-  transition: background 0.2s, transform 0.1s;
+  font-size: 1em;
 }
 
 #config-panel button:hover {
   background: #c73652;
-  transform: translateY(-1px);
 }
-
-/* Quick physical depress feel on click */
-#config-panel button:active {
-  transform: translateY(1px);
-}
-
-/* ==========================================================================
-   GAME STATE HEADS-UP DISPLAY (HUD)
-   ========================================================================== */
 
 #timer {
-  margin: 12px;
-  color: #f5a623; /* Note: JS logic overrides this to #e94560 when clock < 10s */
-  font-size: 1.6em;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 1.5em;
+  margin: 10px;
+  color: #f5a623;
 }
-
-#moves-counter {
-  /* Retain height even when empty to prevent layout shifts on game boot */
-  min-height: 1.4em;
-  margin-bottom: 12px;
-  color: #94a3b8;
-  font-size: 1.05em;
-  font-weight: 500;
-}
-
-/* ==========================================================================
-   END-GAME POPUP MODAL
-   ========================================================================== */
 
 #message {
-  /* Controlled entirely via JS engine (.style.display = 'flex' / 'none') */
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  max-width: 360px;
-  margin: 15px auto;
-  padding: 24px 36px;
-  background: #16213e;
-  border: 2px solid #e94560;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(233, 69, 96, 0.2);
+  font-size: 1.8em;
   color: #e94560;
-  font-size: 1.5em;
-  font-weight: 700;
+  margin: 10px;
+  display: none;
 }
-
-#message-text {
-  display: block;
-  font-size: 1em;
-}
-
-#play-again-btn {
-  padding: 10px 26px;
-  background: #e94560;
-  color: #fff;
-  font-size: 0.65em;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-
-#play-again-btn:hover {
-  background: #c73652;
-  transform: translateY(-1px);
-}
-
-/* ==========================================================================
-   GAME MATRICES & CARD ARCHITECTURE
-   ========================================================================== */
 
 #game-board {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
-  max-width: 720px;
+  padding: 20px;
+  max-width: 700px;
   margin: auto;
-  padding: 15px;
-  /* Note: grid-template-columns inline-injected by generateBoard() based on config */
 }
 
+/* ---- CARD FIX ---- */
 .card {
   width: 80px;
   height: 80px;
-  /* Setup depth perspective for the 3D children flips */
-  perspective: 600px;
   cursor: pointer;
-}
-
-/* Lift unselected cards slightly on hover to hint interactability */
-.card:hover .card-inner:not(.flipped):not(.matched) {
-  transform: scale(1.04);
-  box-shadow: 0 0 12px rgba(233, 69, 96, 0.3);
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
 
 .card-inner {
-  position: relative;
   width: 100%;
   height: 100%;
+  position: relative;
   transform-style: preserve-3d;
-  /* Custom cubic-bezier creates a subtle spring/bounce effect on flip */
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-  border-radius: 10px;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+  -webkit-transition: -webkit-transform 0.6s ease;
+  will-change: transform;
 }
 
-/* Combined triggers handling card rotation states */
 .card.flipped .card-inner,
 .card.matched .card-inner {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
-/* Shared structural layout surfaces for front and back faces */
-.card-front, 
+.card-front,
 .card-back {
   position: absolute;
   width: 100%;
   height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Hide the back element surface when turned around */
-  backface-visibility: hidden;
-  border-radius: 10px;
-  font-size: 2.2em;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  font-size: 2em;
+  top: 0;
+  left: 0;
 }
 
-/* Card Default State (Hidden/Question Mark) */
 .card-front {
   background: #16213e;
   border: 2px solid #e94560;
-  color: #e94560;
+  z-index: 2;
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
 }
 
-/* Card Revealed State (Icon Display) */
 .card-back {
   background: #0f3460;
-  transform: rotateY(180deg); /* Pre-flipped so it turns into view natively */
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  z-index: 1;
 }
 
-/* Card Locked State (Successful Pair Match) */
 .card.matched .card-back {
   background: #1a6640;
   border: 2px solid #2ecc71;
-  box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
 }
