@@ -2,26 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory Scramble</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🃏 Memory Scramble</h1>
-  <div id="config-panel">
-    <!-- Allowed the game grid to scale up to 48 -->
-    <label>Rows: <input type="number" id="rows" value="4" min="2" max="48"></label>
-    <label>Columns: <input type="number" id="cols" value="4" min="2" max="48"></label>
-    <label>Time (sec): <input type="number" id="timeLimit" value="60" min="10"></label>
-    <button onclick="startGame()">Start Game</button>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>🃏 Memory Scramble</h1>
+      <p>Find all matching pairs before time runs out!</p>
+    </div>
+
+    <div class="config-card">
+      <div class="config-row">
+        <div class="field">
+          <label>Rows</label>
+          <input type="number" id="rows" value="4" min="2" max="48">
+        </div>
+        <div class="field">
+          <label>Columns</label>
+          <input type="number" id="cols" value="4" min="2" max="48">
+        </div>
+        <div class="field">
+          <label>Time (sec)</label>
+          <input type="number" id="timeLimit" value="60" min="10" max="300">
+        </div>
+        <button class="btn-start" onclick="startGame()">
+          Start Game
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="stats">
+      <div class="stat">
+        <div class="stat-label">⏱ Time Left</div>
+        <div class="stat-value" id="timer">--</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">✅ Pairs Found</div>
+        <div class="stat-value" id="pairs">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">🎯 Moves</div>
+        <div class="stat-value" id="moves-counter">0</div>
+      </div>
+    </div>
+
+    <div id="message">
+      <span id="message-text"></span>
+      <button id="play-again-btn" onclick="startGame()">🔄 Play Again</button>
+    </div>
+
+    <div id="game-board"></div>
+
   </div>
-  <div id="timer">⏱️</div>
-  <div id="moves-counter"></div>
-  <div id="message">
-    <span id="message-text"></span>
-    <button id="play-again-btn" onclick="startGame()">🔄 Play Again</button>
-  </div>
-  <div id="game-board"></div>
+
   <script src="config.js"></script>
   <script src="game.js"></script>
+
 </body>
 </html>
