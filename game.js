@@ -1,22 +1,36 @@
-const ICONS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼',
-               '🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔',
-               '🐧','🐦','🦆','🦅','🦉','🦇','🐺','🐗'];
+const ICONS = ['🐶','🐱','🦄','🐹','🐰','🦊','🐻','🐼',
+               '🐨','🐯','🦁','🐮','🐎','🐸','🐵','🐔',
+               '🐧','🐍','🦆','🦍','🦉','🐈‍⬛','🪼','🐳'];
 
 let firstCard = null;
 let secondCard = null;
-let lockBoard = false;
+let isChecking = false;
 let matchedPairs = 0;
-let totalPairs = 0;
+let pairsNeeded = 0;
+let moves = 0;
 let timerInterval = null;
 
 function generateBoard(rows, cols) {
-  totalPairs = (rows * cols) / 2;
+  pairsNeeded = (rows * cols) / 2;
   matchedPairs = 0;
+  moves = 0;
   firstCard = null;
   secondCard = null;
-  lockBoard = false;
+  isChecking = false;
 
-  const selectedIcons = ICONS.slice(0, totalPairs);
+  let selectedIcons = [];
+  
+  // If the grid needs more matches than available emojis, generate standard number targets instead
+  if (pairsNeeded <= ICONS.length) {
+    selectedIcons = ICONS.slice(0, pairsNeeded);
+  } else {
+    selectedIcons = [...ICONS];
+    for (let i = ICONS.length + 1; i <= pairsNeeded; i++) {
+      selectedIcons.push(i.toString());
+    }
+  }
+
+  // Duplicate cards to make matching pairs, then randomize order
   const cardValues = [...selectedIcons, ...selectedIcons];
   cardValues.sort(() => Math.random() - 0.5);
 
@@ -25,6 +39,7 @@ function generateBoard(rows, cols) {
   board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   board.style.pointerEvents = 'auto';
 
+  // Build the card elements into HTML container
   cardValues.forEach((icon) => {
     const card = document.createElement('div');
     card.classList.add('card');
@@ -37,30 +52,43 @@ function generateBoard(rows, cols) {
     card.addEventListener('click', () => flipCard(card));
     board.appendChild(card);
   });
+
+  updateMovesCounter();
 }
 
 function flipCard(card) {
-  if (lockBoard) return;
+  // Ignore clicks if 2 cards are already flipping or card is already face up
+  if (isChecking) return;
   if (card.classList.contains('flipped')) return;
   if (card.classList.contains('matched')) return;
+
   card.classList.add('flipped');
+
+  // Assign first picked card
   if (!firstCard) {
     firstCard = card;
     return;
   }
+
+  // Assign second picked card and compare them
   secondCard = card;
-  lockBoard = true;
+  isChecking = true;
+  moves++;
+  updateMovesCounter();
   checkMatch();
 }
 
 function checkMatch() {
   if (firstCard.dataset.value === secondCard.dataset.value) {
+    // Correct match found
     firstCard.classList.add('matched');
     secondCard.classList.add('matched');
     matchedPairs++;
+    updateMovesCounter();
     resetTurn();
-    if (matchedPairs === totalPairs) winGame();
+    if (matchedPairs === pairsNeeded) winGame();
   } else {
+    // If cards don't match, give player 1 second to look before flipping them back down
     setTimeout(() => {
       firstCard.classList.remove('flipped');
       secondCard.classList.remove('flipped');
@@ -72,16 +100,32 @@ function checkMatch() {
 function resetTurn() {
   firstCard = null;
   secondCard = null;
-  lockBoard = false;
+  isChecking = false;
+}
+
+function updateMovesCounter() {
+  const counter = document.getElementById('moves-counter');
+  if (pairsNeeded > 0) {
+    counter.textContent = `Pairs: ${matchedPairs} / ${pairsNeeded}   |   Moves: ${moves}`;
+  }
 }
 
 function startTimer(seconds) {
   let remaining = seconds;
   const display = document.getElementById('timer');
+
+  display.style.color = '#f5a623';
   display.textContent = '⏱ ' + remaining + 's';
+
   timerInterval = setInterval(() => {
     remaining--;
     display.textContent = '⏱ ' + remaining + 's';
+
+    // Change clock text color to neon red if time is running out
+    if (remaining <= 10) {
+      display.style.color = '#e94560';
+    }
+
     if (remaining <= 0) {
       clearInterval(timerInterval);
       gameOver();
@@ -91,23 +135,20 @@ function startTimer(seconds) {
 
 function gameOver() {
   document.getElementById('game-board').style.pointerEvents = 'none';
-  const msg = document.getElementById('message');
-  msg.textContent = "💀 Game Over! Time's up!";
-  msg.style.display = 'block';
+  document.getElementById('message-text').textContent = "💀 Game Over! Time's up!";
+  document.getElementById('message').style.display = 'flex';
 }
 
 function winGame() {
   clearInterval(timerInterval);
-  const msg = document.getElementById('message');
-  msg.textContent = "🎉 You Win! All pairs matched!";
-  msg.style.display = 'block';
+  document.getElementById('message-text').textContent = "🎉 You Win! " + moves + " moves";
+  document.getElementById('message').style.display = 'flex';
 }
 
 function startGame() {
   clearInterval(timerInterval);
-  const msg = document.getElementById('message');
-  msg.textContent = '';
-  msg.style.display = 'none';
+  document.getElementById('message').style.display = 'none';
+  document.getElementById('message-text').textContent = '';
   const config = getConfig();
   const rows = config.rows;
   const cols = config.cols;
