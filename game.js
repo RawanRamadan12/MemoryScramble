@@ -19,8 +19,6 @@ function generateBoard(rows, cols) {
   isChecking = false;
 
   let selectedIcons = [];
-  
-  // If the grid needs more matches than available emojis, generate standard number targets instead
   if (pairsNeeded <= ICONS.length) {
     selectedIcons = ICONS.slice(0, pairsNeeded);
   } else {
@@ -30,7 +28,6 @@ function generateBoard(rows, cols) {
     }
   }
 
-  // Duplicate cards to make matching pairs, then randomize order
   const cardValues = [...selectedIcons, ...selectedIcons];
   cardValues.sort(() => Math.random() - 0.5);
 
@@ -39,7 +36,6 @@ function generateBoard(rows, cols) {
   board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   board.style.pointerEvents = 'auto';
 
-  // Build the card elements into HTML container
   cardValues.forEach((icon) => {
     const card = document.createElement('div');
     card.classList.add('card');
@@ -53,42 +49,37 @@ function generateBoard(rows, cols) {
     board.appendChild(card);
   });
 
-  updateMovesCounter();
+  updateStats();
 }
 
 function flipCard(card) {
-  // Ignore clicks if 2 cards are already flipping or card is already face up
   if (isChecking) return;
   if (card.classList.contains('flipped')) return;
   if (card.classList.contains('matched')) return;
 
   card.classList.add('flipped');
 
-  // Assign first picked card
   if (!firstCard) {
     firstCard = card;
     return;
   }
 
-  // Assign second picked card and compare them
   secondCard = card;
   isChecking = true;
   moves++;
-  updateMovesCounter();
+  updateStats();
   checkMatch();
 }
 
 function checkMatch() {
   if (firstCard.dataset.value === secondCard.dataset.value) {
-    // Correct match found
     firstCard.classList.add('matched');
     secondCard.classList.add('matched');
     matchedPairs++;
-    updateMovesCounter();
+    updateStats();
     resetTurn();
     if (matchedPairs === pairsNeeded) winGame();
   } else {
-    // If cards don't match, give player 1 second to look before flipping them back down
     setTimeout(() => {
       firstCard.classList.remove('flipped');
       secondCard.classList.remove('flipped');
@@ -103,29 +94,23 @@ function resetTurn() {
   isChecking = false;
 }
 
-function updateMovesCounter() {
-  const counter = document.getElementById('moves-counter');
-  if (pairsNeeded > 0) {
-    counter.textContent = `Pairs: ${matchedPairs} / ${pairsNeeded}   |   Moves: ${moves}`;
-  }
+function updateStats() {
+  document.getElementById('pairs').textContent = matchedPairs + ' / ' + pairsNeeded;
+  document.getElementById('moves-counter').textContent = moves;
 }
 
 function startTimer(seconds) {
   let remaining = seconds;
   const display = document.getElementById('timer');
-
-  display.style.color = '#f5a623';
-  display.textContent = '⏱ ' + remaining + 's';
+  display.textContent = remaining + 's';
+  display.className = 'stat-value';
 
   timerInterval = setInterval(() => {
     remaining--;
-    display.textContent = '⏱ ' + remaining + 's';
-
-    // Change clock text color to neon red if time is running out
+    display.textContent = remaining + 's';
     if (remaining <= 10) {
-      display.style.color = '#e94560';
+      display.className = 'stat-value warning';
     }
-
     if (remaining <= 0) {
       clearInterval(timerInterval);
       gameOver();
@@ -135,25 +120,38 @@ function startTimer(seconds) {
 
 function gameOver() {
   document.getElementById('game-board').style.pointerEvents = 'none';
-  document.getElementById('message-text').textContent = "💀 Game Over! Time's up!";
-  document.getElementById('message').style.display = 'flex';
+  const msg = document.getElementById('message');
+  document.getElementById('message-text').textContent =
+    "💀 Game Over! Time's up! You found " + matchedPairs + " of " + pairsNeeded + " pairs!";
+  msg.className = '';
+  msg.style.display = 'flex';
 }
 
 function winGame() {
   clearInterval(timerInterval);
-  document.getElementById('message-text').textContent = "🎉 You Win! " + moves + " moves";
-  document.getElementById('message').style.display = 'flex';
+  const msg = document.getElementById('message');
+  document.getElementById('message-text').textContent =
+    "🎉 You Win! All pairs matched in " + moves + " moves!";
+  msg.className = 'win';
+  msg.style.display = 'flex';
+  document.getElementById('game-board').style.pointerEvents = 'none';
 }
 
 function startGame() {
   clearInterval(timerInterval);
-  document.getElementById('message').style.display = 'none';
+  const msg = document.getElementById('message');
+  msg.style.display = 'none';
+  msg.className = '';
   document.getElementById('message-text').textContent = '';
+  document.getElementById('stats').style.display = 'flex';
+
   const config = getConfig();
   const rows = config.rows;
   const cols = config.cols;
   const timeLimit = config.timeLimit;
+
   if (!validateConfig(rows, cols)) return;
+
   generateBoard(rows, cols);
   startTimer(timeLimit);
 }
