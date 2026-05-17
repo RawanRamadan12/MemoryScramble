@@ -19,6 +19,12 @@ function validateConfig(rows, cols) {
     return false;
   }
 
+  // NEW CHECK: Prevent the total number of cards from going over 48
+  if ((rows * cols) > 48) {
+    alert("Too many cards! The total board size cannot be more than 48 cards.");
+    return false;
+  }
+
   // The total slots must be an even number so every card has a matching pair
   if ((rows * cols) % 2 !== 0) {
     alert("Board size (rows x columns) must be even!");
